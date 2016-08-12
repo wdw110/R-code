@@ -1,0 +1,12 @@
+.Rhistory
+*.dat
+*.txt
+*.pyc
+*.so
+*.pyd
+*~
+.#*
+*.lprof
+*.swp
+*.swo
+.DS_Store
