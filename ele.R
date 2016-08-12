@@ -1,0 +1,40 @@
+library(xts)
+library(readxl)
+library(plyr)
+library(dplyr)
+library(ggplot2)
+library(tseries)
+library(forecast)
+library(xts)
+
+d1 <- read_excel("/Users/wdw/Desktop/test/data/electricity/data/统调.xlsx")
+d2 <- read_excel("/Users/wdw/Desktop/test/data/electricity/data/非统调.xlsx")
+d3 <- read_excel("/Users/wdw/Desktop/test/data/electricity/data/区外来电.xlsx")
+
+js <- ts(matrix(c(d1$发电量,d2$发电量,d3$发电量),36,3),start=c(2011,1),frequency=12)
+colnames(js)=c('统调','非统调','区外来电')
+
+random1 = trend1 = seasonal1 = matrix(0,36,3)
+fit1 = res1 = matrix(0,36,3)
+ff1 = matrix(0,3,4,dimnames=list(c('统调','非统调','区外来电'),c('月用电量','标准差','预测下界','预测上界')))
+
+for(i in 1:3){
+	f = decompose(js[,i])
+	seasonal1[,i] = as.matrix(f$seasonal)
+	trend1[,i] = as.matrix(f$trend)
+	random1[,i] = as.matrix(f$random)
+	fun = auto.arima(js[,i])
+	fore = forecast(fun, h=1)
+	bound = c(fore$lower[2],fore$upper[2])
+	std = sqrt(sum((js[,i]-fore$fitted)^2)/36)
+	ff1[i,] = c(c(fore$mean),std,bound)
+	fit1[,i]=c(fore$fitted)
+	res1[,i]=c(fore$residuals)
+}
+
+write.csv(random1,'/Users/wdw/Desktop/test/data/electricity/model/random1.csv')
+write.csv(seasonal1,'/Users/wdw/Desktop/test/data/electricity/model/seasonal1.csv')
+write.csv(trend1,'/Users/wdw/Desktop/test/data/electricity/model/trend1.csv')
+write.csv(ff1,'/Users/wdw/Desktop/test/data/electricity/model/ff1.csv')
+write.csv(fit1,'/Users/wdw/Desktop/test/data/electricity/model/fit1.csv')
+write.csv(res1,'/Users/wdw/Desktop/test/data/electricity/model/res1.csv')
