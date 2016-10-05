@@ -25,3 +25,5 @@ set.seed(42)
 beta.init <- as.numeric(coefficients(out))
 out <- metrop(lupost, beta.init, 1000, x = x, y = y)
 names(out)
+
+
